@@ -60,6 +60,17 @@ body {
 }
 
 /* Scrollbar */
+/* Scrollbar styling */
+html {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+body {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -78,7 +89,7 @@ body {
     background: var(--border-light);
 }
 
-/* App Layout */
+/* App Layout - Proper flex scrolling */
 #app {
     display: flex;
     flex-direction: column;
@@ -94,18 +105,31 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: var(--header-height);
+    min-height: var(--header-height);
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
-    padding: 0 12px;
+    padding: 8px 12px;
     flex-shrink: 0;
     z-index: 100;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .header-left, .header-center, .header-right {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
+}
+
+.header-center {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+}
+
+.header-right {
+    flex-shrink: 0;
 }
 
 .logo {
@@ -115,6 +139,7 @@ body {
     font-size: 15px;
     font-weight: 600;
     color: var(--accent-primary);
+    white-space: nowrap;
 }
 
 .logo svg {
@@ -139,6 +164,8 @@ body {
     padding: 4px 12px;
     border-radius: var(--radius-md);
     margin-left: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .time-sep {
@@ -274,8 +301,8 @@ body {
 .workspace {
     display: flex;
     flex: 1;
-    overflow: hidden;
     min-height: 0;
+    overflow: hidden;
 }
 
 /* ============================================
@@ -289,6 +316,7 @@ body {
     width: var(--panel-width);
     flex-shrink: 0;
     overflow: hidden;
+    min-height: 0;
 }
 
 .panel-right {
@@ -318,6 +346,9 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     padding: 8px;
+    min-height: 0;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
 }
 
 /* ============================================
@@ -407,6 +438,7 @@ body {
     position: relative;
     overflow: hidden;
     min-width: 0;
+    min-height: 0;
 }
 
 .stage-container::before {
@@ -419,6 +451,7 @@ body {
     background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
     background-size: 20px 20px;
     pointer-events: none;
+    z-index: 1;
 }
 
 .stage-wrapper {
@@ -427,14 +460,17 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     position: relative;
     overflow: auto;
     min-height: 0;
+    overscroll-behavior: contain;
 }
 
 .stage-wrapper > .stage {
-    margin: auto;
+    flex-shrink: 0;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .stage {
@@ -445,6 +481,8 @@ body {
     transform-origin: center center;
     transition: width 0.3s, height 0.3s;
     flex-shrink: 0;
+    max-width: 100%;
+    max-height: calc(100vh - var(--header-height) - var(--timeline-height) - 80px);
 }
 
 .stage-content {
@@ -542,6 +580,8 @@ body {
     background: var(--bg-secondary);
     border-top: 1px solid var(--border-color);
     flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .zoom-control {
@@ -585,19 +625,22 @@ body {
     line-height: 1.2;
     max-width: 90%;
     pointer-events: auto;
+    /* Center the element on its x,y point */
+    transform: translate(-50%, -50%);
 }
 
 .text-layer.selected {
-    outline: 1px dashed var(--accent-primary);
-    outline-offset: 8px;
+    outline: 2px dashed var(--accent-primary);
+    outline-offset: 10px;
     z-index: 100;
 }
 
 .text-layer .resize-handle {
     position: absolute;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     background: var(--accent-primary);
+    border: 2px solid var(--bg-primary);
     border-radius: 50%;
     display: none;
     z-index: 20;
@@ -607,19 +650,20 @@ body {
     display: block;
 }
 
-.resize-handle.nw { top: -6px; left: -6px; cursor: nw-resize; }
-.resize-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
-.resize-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
-.resize-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+.resize-handle.nw { top: -8px; left: -8px; cursor: nw-resize; }
+.resize-handle.ne { top: -8px; right: -8px; cursor: ne-resize; }
+.resize-handle.sw { bottom: -8px; left: -8px; cursor: sw-resize; }
+.resize-handle.se { bottom: -8px; right: -8px; cursor: se-resize; }
 
 .text-layer .rotate-handle {
     position: absolute;
-    top: -24px;
+    top: -28px;
     left: 50%;
     transform: translateX(-50%);
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     background: var(--accent-secondary);
+    border: 2px solid var(--bg-primary);
     border-radius: 50%;
     display: none;
     cursor: grab;
@@ -801,6 +845,7 @@ body {
     flex-direction: column;
     flex-shrink: 0;
     z-index: 50;
+    min-height: var(--timeline-height);
 }
 
 .timeline-header {
@@ -831,6 +876,7 @@ body {
     flex: 1;
     position: relative;
     overflow: hidden;
+    min-height: 0;
 }
 
 .timeline-ruler {
@@ -868,6 +914,8 @@ body {
     right: 0;
     bottom: 0;
     overflow: auto;
+    min-height: 0;
+    overscroll-behavior: contain;
 }
 
 .timeline-track {
@@ -1139,25 +1187,39 @@ body {
    Responsive
    ============================================ */
 @media (max-width: 1024px) {
-    .panel {
-        width: 200px;
-    }
-
     :root {
         --panel-width: 200px;
+    }
+
+    .panel {
+        width: var(--panel-width);
+    }
+}
+
+@media (max-width: 1200px) and (min-width: 769px) {
+    :root {
+        --panel-width: 220px;
     }
 }
 
 @media (max-width: 768px) {
+    :root {
+        --panel-width: 100%;
+        --timeline-height: 160px;
+    }
+
     .workspace {
         flex-direction: column;
+        overflow: auto;
     }
 
     .panel {
         width: 100%;
-        height: 180px;
+        height: auto;
+        max-height: 200px;
         border-right: none;
         border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
     }
 
     .panel-right {
@@ -1167,15 +1229,30 @@ body {
 
     .stage-container {
         order: -1;
-        min-height: 300px;
+        min-height: 250px;
+        flex-shrink: 0;
+    }
+
+    .stage-wrapper {
+        padding: 8px;
     }
 
     .timeline-container {
-        height: 160px;
+        min-height: 140px;
+        flex-shrink: 0;
     }
 
     .header-center {
         display: none;
+    }
+
+    .header-right {
+        gap: 4px;
+    }
+
+    .btn-icon {
+        width: 36px;
+        height: 36px;
     }
 }
 

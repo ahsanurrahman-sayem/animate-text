@@ -606,7 +606,7 @@ class StageManager {
 
         this.width = 1920;
         this.height = 1080;
-        this.zoom = 0.5;
+        this.zoom = this.calculateOptimalZoom();
         this.showGrid = false;
         this.showRulers = false;
         this.gridSize = 40;
@@ -627,6 +627,23 @@ class StageManager {
         this.stage.style.width = `${this.width}px`;
         this.stage.style.height = `${this.height}px`;
         this.applyZoom();
+    }
+
+    calculateOptimalZoom() {
+        // Calculate zoom to fit stage within available viewport
+        const headerHeight = 48;
+        const timelineHeight = 200;
+        const stageControlsHeight = 40;
+        const padding = 40;
+
+        const availableWidth = window.innerWidth - 520; // minus panels
+        const availableHeight = window.innerHeight - headerHeight - timelineHeight - stageControlsHeight - padding;
+
+        const zoomX = availableWidth / this.width;
+        const zoomY = availableHeight / this.height;
+
+        // Use the smaller zoom to fit entirely, with a minimum of 0.25
+        return Math.max(0.25, Math.min(zoomX, zoomY, 1.0));
     }
 
     applyZoom() {
@@ -849,6 +866,7 @@ class StageManager {
     setSize(width, height) {
         this.width = width;
         this.height = height;
+        this.zoom = this.calculateOptimalZoom();
         this.updateStageSize();
     }
 }
@@ -1717,6 +1735,12 @@ class TextMotionStudio {
         // Initial push to history
         this.pushHistory();
 
+        // Calculate optimal zoom after DOM is ready
+        setTimeout(() => {
+            this.stage.zoom = this.stage.calculateOptimalZoom();
+            this.stage.applyZoom();
+        }, 100);
+
         Toast.show('Text Motion Studio loaded', 'success');
 
         // Show welcome modal on first visit
@@ -1881,6 +1905,7 @@ class TextMotionStudio {
 
         // Window resize
         window.addEventListener('resize', Utils.debounce(() => {
+            this.stage.zoom = this.stage.calculateOptimalZoom();
             this.stage.applyZoom();
         }, 200));
 
@@ -1997,7 +2022,7 @@ class TextMotionStudio {
         el.style.textAlign = layer.textAlign;
         el.style.color = layer.color;
         el.style.opacity = layer.opacity;
-        el.style.transform = `translate(-50%, -50%) scale(${layer.scale}) rotate(${layer.rotation}deg) rotateX(${layer.rotateX}deg) rotateY(${layer.rotateY}deg)`;
+        el.style.transform = `translate(-50%, -50%) scale(${layer.scale}) rotate(${layer.rotation}deg)`;
         el.style.perspective = `${layer.perspective}px`;
         el.style.filter = layer.blur > 0 ? `blur(${layer.blur}px)` : 'none';
         el.style.writingMode = layer.vertical ? 'vertical-rl' : 'horizontal-tb';
