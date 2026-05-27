@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CSS Animation Sandbox</title>
+	<style>
+		:root {
+			--bg-color: #1e1e24;
+			--panel-color: #2a2a35;
+			--text-color: #e2e8f0;
+			--accent-color: #3b82f6;
+			--accent-hover: #2563eb;
+			--border-color: #3f3f46;
+			--delete-color: #ef4444;
+			--delete-hover: #dc2626;
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+			background-color: var(--bg-color);
+			color: var(--text-color);
+			height: 100vh;
+			display: flex;
+			overflow: hidden;
+		}
+
+		.sidebar {
+			width: 400px;
+			background-color: var(--panel-color);
+			border-right: 1px solid var(--border-color);
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			flex-shrink: 0;
+		}
+
+		.panel-header {
+			padding: 20px;
+			border-bottom: 1px solid var(--border-color);
+		}
+
+		.panel-header h1 {
+			font-size: 1.25rem;
+			font-weight: 600;
+		}
+
+		.controls-form {
+			padding: 20px;
+			overflow-y: auto;
+			flex-grow: 1;
+		}
+
+		.control-group {
+			margin-bottom: 16px;
+		}
+
+		.control-group label {
+			display: block;
+			font-size: 0.85rem;
+			font-weight: 500;
+			margin-bottom: 6px;
+			color: #a1a1aa;
+		}
+
+		.control-group select, 
+		.control-group input[type="text"],
+		.control-group input[type="number"] {
+			width: 100%;
+			background-color: var(--bg-color);
+			border: 1px solid var(--border-color);
+			color: var(--text-color);
+			padding: 8px 12px;
+			border-radius: 4px;
+			font-family: inherit;
+			font-size: 0.9rem;
+			outline: none;
+		}
+
+		.control-group select:focus, 
+		.control-group input:focus {
+			border-color: var(--accent-color);
+		}
+
+		.keyframe-builder {
+			border: 1px dashed var(--border-color);
+			padding: 12px;
+			border-radius: 6px;
+			margin-top: 8px;
+		}
+
+		.keyframe-card {
+			background-color: rgba(0, 0, 0, 0.2);
+			border: 1px solid var(--border-color);
+			padding: 12px;
+			border-radius: 6px;
+			margin-bottom: 12px;
+			position: relative;
+		}
+
+		.keyframe-card-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 8px;
+			border-bottom: 1px dashed var(--border-color);
+			padding-bottom: 6px;
+		}
+
+		.keyframe-card-title {
+			font-size: 0.8rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			color: #a1a1aa;
+		}
+
+		.keyframe-field {
+			margin-bottom: 8px;
+		}
+		
+		.keyframe-field:last-child {
+			margin-bottom: 0;
+		}
+
+		.keyframe-field label {
+			display: block;
+			font-size: 0.75rem;
+			color: #a1a1aa;
+			margin-bottom: 4px;
+		}
+
+		.keyframe-field input, .keyframe-field select {
+			width: 100%;
+			background-color: var(--bg-color);
+			border: 1px solid var(--border-color);
+			color: var(--text-color);
+			padding: 6px 10px;
+			border-radius: 4px;
+			font-size: 0.85rem;
+			outline: none;
+		}
+
+		.btn-del {
+			background-color: transparent;
+			border: none;
+			color: var(--delete-color);
+			font-size: 1.1rem;
+			cursor: pointer;
+			line-height: 1;
+		}
+
+		.btn-del:hover {
+			color: var(--delete-hover);
+		}
+
+		.action-buttons {
+			padding: 20px;
+			border-top: 1px solid var(--border-color);
+			display: flex;
+			gap: 10px;
+			background-color: var(--panel-color);
+		}
+
+		.btn {
+			flex: 1;
+			background-color: var(--accent-color);
+			color: white;
+			border: none;
+			padding: 10px;
+			border-radius: 4px;
+			font-weight: 600;
+			cursor: pointer;
+			font-size: 0.9rem;
+			text-align: center;
+		}
+
+		.btn:hover {
+			background-color: var(--accent-hover);
+		}
+
+		.btn-secondary {
+			background-color: transparent;
+			border: 1px solid var(--border-color);
+			color: var(--text-color);
+		}
+
+		.btn-secondary:hover {
+			background-color: rgba(255, 255, 255, 0.05);
+		}
+
+		.main-content {
+			flex-grow: 1;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			position: relative;
+		}
+
+		.sandbox-viewport {
+			flex-grow: 1;
+			background-color: #121214;
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		#animated-wrapper {
+			position: absolute;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.element-shape {
+			width: 80px;
+			height: 80px;
+			background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+			border-radius: 8px;
+		}
+
+		.element-shape.circle { border-radius: 50%; }
+		.element-shape.triangle {
+			width: 0; height: 0; background: transparent;
+			border-left: 40px solid transparent; border-right: 40px solid transparent;
+			border-bottom: 80px solid #3b82f6;
+		}
+
+		.element-text {
+			font-size: 2.5rem; font-weight: bold; color: #3b82f6; white-space: nowrap;
+		}
+
+		.code-output-panel {
+			height: 250px;
+			background-color: #0f0f11;
+			border-top: 1px solid var(--border-color);
+			padding: 15px 20px;
+			font-family: "Courier New", Courier, monospace;
+			font-size: 0.85rem;
+			overflow-y: auto;
+			white-space: pre-wrap;
+			color: #34d399;
+		}
+
+		.code-title {
+			color: #a1a1aa; font-weight: bold; margin-bottom: 6px;
+			font-family: sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;
+		}
+
+		@media (max-width: 768px) {
+			body {
+				flex-direction: column;
+				overflow: auto;
+				height: auto;
+			}
+			.sidebar {
+				width: 100%;
+				height: auto;
+				border-right: none;
+				border-bottom: 1px solid var(--border-color);
+			}
+			.main-content {
+				height: auto;
+			}
+			.sandbox-viewport {
+				height: 350px;
+			}
+			.code-output-panel {
+				height: 300px;
+			}
+		}
+	</style>
+</head>
+<body>
+
+	<div class="sidebar">
+		<div class="panel-header">
+			<h1>Animation Playground</h1>
+		</div>
+		
+		<div class="controls-form">
+			<div class="control-group">
+				<label for="element-type">Element Type</label>
+				<select id="element-type">
+					<option value="object" selected>Object / Shape</option>
+					<option value="text">Text</option>
+				</select>
+			</div>
+
+			<div class="control-group" id="shape-select-group">
+				<label for="element-shape">Choose Shape</label>
+				<select id="element-shape">
+					<option value="square" selected>Square</option>
+					<option value="circle">Circle</option>
+					<option value="triangle">Triangle</option>
+				</select>
+			</div>
+
+			<div class="control-group" id="text-input-group" style="display: none;">
+				<label for="element-text-val">Custom Text</label>
+				<input type="text" id="element-text-val" value="Animate Me!">
+			</div>
+
+			<div class="control-group">
+				<label>Custom Keyframes Timeline</label>
+				<div class="keyframe-builder">
+					<div id="keyframes-container"></div>
+					<button class="btn btn-secondary" id="btn-add-kf" style="padding: 6px 12px; font-size: 0.8rem; margin-top: 4px; width: 100%;">+ Add Keyframe Step</button>
+				</div>
+			</div>
+
+			<div class="control-group">
+				<label for="anim-duration">animation-duration (seconds)</label>
+				<input type="number" id="anim-duration" value="2" min="0" step="0.1">
+			</div>
+
+			<div class="control-group">
+				<label for="anim-timing">animation-timing-function</label>
+				<select id="anim-timing">
+					<option value="linear">linear</option>
+					<option value="ease" selected>ease</option>
+					<option value="ease-in">ease-in</option>
+					<option value="ease-out">ease-out</option>
+					<option value="ease-in-out">ease-in-out</option>
+				</select>
+			</div>
+
+			<div class="control-group">
+				<label for="anim-delay">animation-delay (seconds)</label>
+				<input type="number" id="anim-delay" value="0" min="0" step="0.1">
+			</div>
+
+			<div class="control-group">
+				<label for="anim-iteration">animation-iteration-count</label>
+				<select id="anim-iteration">
+					<option value="1">1</option>
+					<option value="3">3</option>
+					<option value="infinite" selected>infinite</option>
+				</select>
+			</div>
+
+			<div class="control-group">
+				<label for="anim-direction">animation-direction</label>
+				<select id="anim-direction">
+					<option value="normal">normal</option>
+					<option value="reverse">reverse</option>
+					<option value="alternate" selected>alternate</option>
+					<option value="alternate-reverse">alternate-reverse</option>
+				</select>
+			</div>
+
+			<div class="control-group">
+				<label for="anim-fill">animation-fill-mode</label>
+				<select id="anim-fill">
+					<option value="none" selected>none</option>
+					<option value="forwards">forwards</option>
+					<option value="backwards">backwards</option>
+					<option value="both">both</option>
+				</select>
+			</div>
+
+			<div class="control-group">
+				<label for="anim-play-state">animation-play-state</label>
+				<select id="anim-play-state">
+					<option value="running" selected>running</option>
+					<option value="paused">paused</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="action-buttons">
+			<button class="btn btn-secondary" id="btn-reset">Reset Sandbox</button>
+			<button class="btn" id="btn-trigger">Re-Trigger</button>
+		</div>
+	</div>
+
+	<div class="main-content">
+		<div class="sandbox-viewport">
+			<div id="animated-wrapper"></div>
+		</div>
+		
+		<div class="code-output-panel">
+			<div class="code-title">Generated CSS Properties & Keyframes</div>
+			<div id="css-code-block"></div>
+		</div>
+	</div>
+
+	<script>
+		const dynamicStyle = document.createElement("style");
+		document.head.appendChild(dynamicStyle);
+
+		const wrapper = document.getElementById("animated-wrapper");
+		const codeBlock = document.getElementById("css-code-block");
+		const kfContainer = document.getElementById("keyframes-container");
+		
+		const typeSelect = document.getElementById("element-type");
+		const shapeSelect = document.getElementById("element-shape");
+		const textInput = document.getElementById("element-text-val");
+		const shapeGroup = document.getElementById("shape-select-group");
+		const textGroup = document.getElementById("text-input-group");
+
+		const controls = [
+			"anim-duration", "anim-timing", "anim-delay", 
+			"anim-iteration", "anim-direction", "anim-fill", "anim-play-state"
+		].reduce((acc, id) => {
+			acc[id] = document.getElementById(id);
+			return acc;
+		}, {});
+
+		let defaultKeyframes = [
+			{ pct: "0", prop: "transform", val: "translateX(-100px) rotate(0deg)" },
+			{ pct: "50", prop: "opacity", val: "0.5" },
+			{ pct: "100", prop: "transform", val: "translateX(100px) rotate(360deg)" }
+		];
+
+		function initKeyframeRows(data) {
+			kfContainer.innerHTML = "";
+			data.forEach(kf => addKeyframeCard(kf.pct, kf.prop, kf.val));
+		}
+
+		function addKeyframeCard(pct = "0", prop = "transform", val = "") {
+			const card = document.createElement("div");
+			card.className = "keyframe-card";
+			
+			const isPreset = ["transform", "opacity", "background-color", "filter"].includes(prop) || prop === "";
+			const initialPropSelect = isPreset ? prop : "custom";
+			const initialCustomProp = isPreset ? "" : prop;
+
+			card.innerHTML = `
+				<div class="keyframe-card-header">
+					<span class="keyframe-card-title">Timeline Step</span>
+					<button class="btn-del" title="Remove step">&times;</button>
+				</div>
+				<div class="keyframe-field">
+					<label>Timeline Position (%)</label>
+					<input type="number" class="kf-pct" value="${pct}" min="0" max="100" placeholder="e.g. 50">
+				</div>
+				<div class="keyframe-field">
+					<label>CSS Property</label>
+					<select class="kf-prop-select">
+						<option value="transform" ${initialPropSelect==='transform'?'selected':''}>transform</option>
+						<option value="opacity" ${initialPropSelect==='opacity'?'selected':''}>opacity</option>
+						<option value="background-color" ${initialPropSelect==='background-color'?'selected':''}>background-color</option>
+						<option value="filter" ${initialPropSelect==='filter'?'selected':''}>filter</option>
+						<option value="custom" ${initialPropSelect==='custom'?'selected':''}>[Other Property...]</option>
+					</select>
+				</div>
+				<div class="keyframe-field kf-custom-prop-container" style="display: ${initialPropSelect==='custom'?'block':'none'};">
+					<label>Custom Property Name</label>
+					<input type="text" class="kf-custom-prop" value="${initialCustomProp}" placeholder="e.g. top, border-radius, width">
+				</div>
+				<div class="keyframe-field">
+					<label>Value</label>
+					<input type="text" class="kf-val" value="${val}" placeholder="e.g. scale(1.5) or 0.5">
+				</div>
+			`;
+			
+			const propSelect = card.querySelector(".kf-prop-select");
+			const customPropContainer = card.querySelector(".kf-custom-prop-container");
+			
+			propSelect.addEventListener("change", () => {
+				if (propSelect.value === "custom") {
+					customPropContainer.style.display = "block";
+				} else {
+					customPropContainer.style.display = "none";
+				}
+				updateAnimation();
+			});
+
+			card.querySelector(".btn-del").addEventListener("click", () => {
+				card.remove();
+				updateAnimation();
+			});
+
+			card.querySelectorAll("input, select").forEach(el => {
+				el.addEventListener("input", updateAnimation);
+				el.addEventListener("change", updateAnimation);
+			});
+
+			kfContainer.appendChild(card);
+		}
+
+		function buildKeyframeStyles() {
+			const cards = kfContainer.querySelectorAll(".keyframe-card");
+			let framesMap = {};
+
+			cards.forEach(card => {
+				const pct = card.querySelector(".kf-pct").value || "0";
+				const selectVal = card.querySelector(".kf-prop-select").value;
+				const prop = selectVal === "custom" ? card.querySelector(".kf-custom-prop").value.trim() : selectVal;
+				const val = card.querySelector(".kf-val").value;
+				
+				if (!framesMap[pct]) framesMap[pct] = [];
+				if (prop && val) framesMap[pct].push(`${prop}: ${val};`);
+			});
+
+			let sortedPcts = Object.keys(framesMap).sort((a, b) => a - b);
+			let cssRules = "";
+
+			sortedPcts.forEach(pct => {
+				cssRules += `\t${pct}% {\n\t\t${framesMap[pct].join("\n\t\t")}\n\t}\n`;
+			});
+
+			return cssRules ? `@keyframes custom-sandbox {\n${cssRules}}` : "";
+		}
+
+		function renderElement() {
+			wrapper.innerHTML = "";
+			if (typeSelect.value === "object") {
+				shapeGroup.style.display = "block";
+				textGroup.style.display = "none";
+				const shapeEl = document.createElement("div");
+				shapeEl.className = `element-shape ${shapeSelect.value}`;
+				wrapper.appendChild(shapeEl);
+			} else {
+				shapeGroup.style.display = "none";
+				textGroup.style.display = "block";
+				const textEl = document.createElement("div");
+				textEl.className = "element-text";
+				textEl.textContent = textInput.value;
+				wrapper.appendChild(textEl);
+			}
+			updateAnimation();
+		}
+
+		function updateAnimation() {
+			if (dynamicStyle.sheet.cssRules.length > 0) {
+				dynamicStyle.sheet.deleteRule(0);
+			}
+
+			const keyframeCSS = buildKeyframeStyles();
+			if (keyframeCSS) {
+				dynamicStyle.sheet.insertRule(keyframeCSS, 0);
+			}
+
+			const name = "custom-sandbox";
+			const duration = controls["anim-duration"].value + "s";
+			const timing = controls["anim-timing"].value;
+			const delay = controls["anim-delay"].value + "s";
+			const iteration = controls["anim-iteration"].value;
+			const direction = controls["anim-direction"].value;
+			const fill = controls["anim-fill"].value;
+			const playState = controls["anim-play-state"].value;
+
+			wrapper.style.animationName = name;
+			wrapper.style.animationDuration = duration;
+			wrapper.style.animationTimingFunction = timing;
+			wrapper.style.animationDelay = delay;
+			wrapper.style.animationIterationCount = iteration;
+			wrapper.style.animationDirection = direction;
+			wrapper.style.animationFillMode = fill;
+			wrapper.style.animationPlayState = playState;
+
+			codeBlock.textContent = `${keyframeCSS}\n\n` +
+				`.animated-element {\n` +
+				`\tanimation-name: ${name};\n` +
+				`\tanimation-duration: ${duration};\n` +
+				`\tanimation-timing-function: ${timing};\n` +
+				`\tanimation-delay: ${delay};\n` +
+				`\tanimation-iteration-count: ${iteration};\n` +
+				`\tanimation-direction: ${direction};\n` +
+				`\tanimation-fill-mode: ${fill};\n` +
+				`\tanimation-play-state: ${playState};\n` +
+				`}\n\n` +
+				`/* Shorthand */\n` +
+				`.animated-element {\n` +
+				`\tanimation: ${name} ${duration} ${timing} ${delay} ${iteration} ${direction} ${fill} ${playState};\n` +
+				`}`;
+		}
+
+		typeSelect.addEventListener("change", renderElement);
+		shapeSelect.addEventListener("change", renderElement);
+		textInput.addEventListener("input", renderElement);
+		document.getElementById("btn-add-kf").addEventListener("click", () => {
+			addKeyframeCard("50", "transform", "");
+			updateAnimation();
+		});
+
+		Object.values(controls).forEach(control => {
+			control.addEventListener("change", updateAnimation);
+			control.addEventListener("input", updateAnimation);
+		});
+
+		document.getElementById("btn-trigger").addEventListener("click", () => {
+			const currentAnim = wrapper.style.animationName;
+			wrapper.style.animationName = 'none';
+			void wrapper.offsetWidth; 
+			wrapper.style.animationName = currentAnim;
+		});
+
+		document.getElementById("btn-reset").addEventListener("click", () => {
+			typeSelect.value = "object";
+			shapeSelect.value = "square";
+			textInput.value = "Animate Me!";
+			controls["anim-duration"].value = "2";
+			controls["anim-timing"].value = "ease";
+			controls["anim-delay"].value = "0";
+			controls["anim-iteration"].value = "infinite";
+			controls["anim-direction"].value = "alternate";
+			controls["anim-fill"].value = "none";
+			controls["anim-play-state"].value = "running";
+			initKeyframeRows(defaultKeyframes);
+			renderElement();
+		});
+
+		initKeyframeRows(defaultKeyframes);
+		renderElement();
+	</script>
+</body>
+</html>
